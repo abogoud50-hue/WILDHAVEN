@@ -11,7 +11,7 @@ export class AudioManager {
     const C = window.AudioContext || window.webkitAudioContext;
     if (!C || this.ctx) return;
     const x = this.ctx = new C();
-    this.out = x.createGain(); this.out.gain.value = 0.9; this.out.connect(x.destination);
+    this.out = x.createGain(); this.out.gain.value = this.vol ?? 0.9; this.out.connect(x.destination);
 
     const n = x.sampleRate * 3, buf = this.buf = x.createBuffer(1, n, x.sampleRate), d = buf.getChannelData(0);
     let b0 = 0, b1 = 0, b2 = 0;
@@ -61,6 +61,22 @@ export class AudioManager {
     const g = x.createGain();
     g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(P[2], t + .015); g.gain.exponentialRampToValueAtTime(.001, t + P[3]);
     s.connect(f); f.connect(g); g.connect(this.out); s.start(t, Math.random() * 2, P[3] + .05);
+  }
+
+  // مؤثرات الضرب حسب الأداة: chop فأس، pick معول، hand يد/أداة خاطئة، miss تلويح
+  hit(kind) {
+    if (!this.ctx) return;
+    const x = this.ctx, t = x.currentTime, P = { chop: ['lowpass', 500, .8, .18, 130], pick: ['highpass', 2800, .55, .1, 1700], hand: ['lowpass', 260, .5, .1, 0], miss: ['bandpass', 900, .12, .2, 0] }[kind];
+    const s = x.createBufferSource(); s.buffer = this.buf;
+    const f = x.createBiquadFilter(); f.type = P[0]; f.frequency.value = P[1];
+    const g = x.createGain(); g.gain.setValueAtTime(P[2], t); g.gain.exponentialRampToValueAtTime(.001, t + P[3]);
+    s.connect(f); f.connect(g); g.connect(this.out); s.start(t, Math.random() * 2, P[3] + .05);
+    if (P[4]) {
+      const o = x.createOscillator(), og = x.createGain(); o.type = kind === 'pick' ? 'triangle' : 'sine';
+      o.frequency.setValueAtTime(P[4], t); o.frequency.exponentialRampToValueAtTime(P[4] / 2, t + P[3]);
+      og.gain.setValueAtTime(P[2] * .6, t); og.gain.exponentialRampToValueAtTime(.001, t + P[3]);
+      o.connect(og); og.connect(this.out); o.start(t); o.stop(t + P[3] + .05);
+    }
   }
 
   update(dt, env, p, world) {
