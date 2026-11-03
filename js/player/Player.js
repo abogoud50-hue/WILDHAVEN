@@ -36,7 +36,8 @@ export class Player {
     this.yaw -= l.dx * P.lookSens;
     this.pitch = Math.max(-1.4, Math.min(1.4, this.pitch - l.dy * P.lookSens));
 
-    const sp = (input.sprint ? P.sprint : P.speed) * dt;
+    const V = this.vitals, moving = Math.hypot(input.move.x, input.move.y) > 0.1, run = input.sprint && moving && !V.tired && V.st > 0;
+    const sp = (run ? P.sprint : P.speed) * (V.tired ? 0.5 : 1) * dt;
     const fx = -Math.sin(this.yaw), fz = -Math.cos(this.yaw), rx = Math.cos(this.yaw), rz = -Math.sin(this.yaw);
     let mx = fx * input.move.y + rx * input.move.x, mz = fz * input.move.y + rz * input.move.x;
     const len = Math.hypot(mx, mz);
@@ -46,10 +47,11 @@ export class Player {
     if (!this._blocked(nx, oz)) this.x = nx;
     if (!this._blocked(this.x, nz)) this.z = nz;
 
-    if (input.consumeJump() && this.grounded) { this.vy = P.jump; this.grounded = false; }
+    if (input.consumeJump() && this.grounded && V.can(8)) { V.spend(8); this.vy = P.jump; this.grounded = false; }
     const ground = Math.max(this.world.heightAt(this.x, this.z), -0.6);
     this.vy -= P.gravity * dt; this.y += this.vy * dt;
-    if (this.y <= ground) { this.y = ground; this.vy = 0; this.grounded = true; }
+    if (this.y <= ground) { if (this.vy < -14 && ground > -0.1) V.hurt((-this.vy - 14) * 4); this.y = ground; this.vy = 0; this.grounded = true; }
+    V.update(dt, run, moving, this.grounded && ground < -0.1);
 
     // خطوات الأقدام حسب نوع السطح
     this.stepSurface = null;

@@ -22,6 +22,7 @@ export class Inventory {
     this.onChange();
     return n;
   }
+  use(i) { const s = this.slots[i]; if (s && --s.count <= 0) this.slots[i] = null; this.onChange(); }
   select(i) { this.sel = i; this.onChange(true); }
   get current() { return this.slots[this.sel]; }
 }
