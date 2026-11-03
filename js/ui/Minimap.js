@@ -4,7 +4,6 @@ export class Minimap {
   constructor(world) {
     this.cv = document.getElementById('mini');
     this.ctx = this.cv.getContext('2d');
-    this.label = document.getElementById('miniLabel');
     const S = this.S = this.cv.width, half = this.half = CONFIG.world.size / 2;
     this.t = 0;
     // رسم التضاريس مرة واحدة فقط
@@ -25,19 +24,15 @@ export class Minimap {
     c.clearRect(0, 0, this.S, this.S);
     c.drawImage(this.base, 0, 0);
     c.font = '11px sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
-    let best = null, bd = 1e9;
     for (const z of CONFIG.zones) {
       const [mx, my] = this.toMap(z.x, z.z);
       c.fillStyle = 'rgba(0,0,0,.55)'; c.beginPath(); c.arc(mx, my, 7, 0, 6.3); c.fill();
       c.fillText(z.icon, mx, my + 1);
-      const d = Math.hypot(z.x - p.x, z.z - p.z);
-      if (d < bd) { bd = d; best = z; }
     }
     const [px, py] = this.toMap(p.x, p.z);
     c.save(); c.translate(px, py); c.rotate(-p.yaw);
     c.fillStyle = '#ffd24a'; c.strokeStyle = '#000'; c.lineWidth = 1.5;
     c.beginPath(); c.moveTo(0, -7); c.lineTo(5, 6); c.lineTo(0, 3); c.lineTo(-5, 6); c.closePath(); c.fill(); c.stroke();
     c.restore();
-    this.label.textContent = `${best.name} · ${Math.round(bd)} م`;
   }
 }
