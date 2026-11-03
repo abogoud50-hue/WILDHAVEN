@@ -9,6 +9,9 @@ import { AudioManager } from './core/Audio.js';
 import { Interaction } from './core/Interaction.js';
 import { Minimap } from './ui/Minimap.js';
 import { Hotbar } from './ui/Hotbar.js';
+import { Compass } from './ui/Compass.js';
+import { Settings } from './ui/Settings.js';
+import { Net } from './net/Net.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -43,8 +46,10 @@ const input = new TouchControls();
 const env = new Environment(scene, camera, q, sun, hemi);
 const audio = new AudioManager();
 const mini = new Minimap(world);
-const inter = new Interaction(world, player, inv);
+const inter = new Interaction(world, player, inv, audio);
 new Hotbar(inv);
+const compass = new Compass(), net = new Net(scene, player);
+new Settings({ player, audio, net });
 
 addEventListener('resize', () => { applyPR(); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); });
 document.addEventListener('visibilitychange', () => audio.suspend(document.hidden));
@@ -70,6 +75,8 @@ renderer.setAnimationLoop((now) => {
     audio.update(dt, env, player, world);
     if (player.stepSurface) audio.step(player.stepSurface);
     mini.update(dt, player);
+    compass.update(player.yaw);
+    net.update(dt);
   } else { // الواجهة الرئيسية: كاميرا تدور حول الشخصية داخل العالم
     orbit += dt * 0.15;
     camera.position.set(player.x + Math.sin(orbit) * 8, player.y + 3.2, player.z + Math.cos(orbit) * 8);
