@@ -17,14 +17,25 @@
 <div id="lookZone"></div>
 
 <div id="hud"><span id="info"></span><span id="fps"></span></div>
-<div id="mapWrap"><canvas id="mini" width="128" height="128"></canvas><div id="miniLabel"></div></div>
+<div id="compass"><canvas id="cmp" width="360" height="34"></canvas></div>
+<div id="mapWrap"><canvas id="mini" width="128" height="128"></canvas></div>
 
 <button id="btnCam" class="btn sm">👁</button>
+<button id="btnSet" class="btn sm">⚙</button>
 <button id="btnSprint" class="btn">ركض</button>
 <button id="btnJump" class="btn">قفز</button>
-<button id="btnAct" class="btn act"><span id="actLbl">تفاعل</span></button>
+<button id="btnAct" class="btn act"><span id="actLbl">✋</span></button>
 
 <div id="toast"></div>
+<div id="settings"><div class="panel"><h2>الإعدادات</h2>
+<div class="row"><span>المنظور</span><button id="sView" class="tg">ثالث</button></div>
+<div class="row"><span>عرض FPS</span><button id="sFps" class="tg on">تشغيل</button></div>
+<div class="row"><span>الصوت</span><input id="sVol" type="range" min="0" max="100"></div>
+<div class="row"><span>لعب جماعي (Wi-Fi / نقطة اتصال)</span></div>
+<div class="row"><button id="sHost" class="tg">استضافة</button><input id="sCode" inputmode="numeric" maxlength="6" placeholder="رمز الانضمام"><button id="sJoin" class="tg">انضم</button></div>
+<small id="sNet"></small>
+<div class="row"><button id="sReset" class="tg red">إعادة ضبط اللعبة</button><button id="sClose" class="tg">إغلاق</button></div>
+</div></div>
 <div id="itemName"></div>
 <div id="hotbar"></div>
 
