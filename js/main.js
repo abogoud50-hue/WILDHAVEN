@@ -12,6 +12,8 @@ import { Hotbar } from './ui/Hotbar.js';
 import { Compass } from './ui/Compass.js';
 import { Settings } from './ui/Settings.js';
 import { Net } from './net/Net.js';
+import { Vitals } from './core/Vitals.js';
+import { Home } from './world/Home.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -42,11 +44,13 @@ const camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.1, q.
 const world = new World(scene, q);
 const inv = new Inventory();
 const player = new Player(camera, world, scene);
+const vit = new Vitals(); player.vitals = vit;
+const home = new Home(scene, world, player.x, player.z);
 const input = new TouchControls();
 const env = new Environment(scene, camera, q, sun, hemi);
 const audio = new AudioManager();
 const mini = new Minimap(world);
-const inter = new Interaction(world, player, inv, audio);
+const inter = new Interaction(world, player, inv, audio, vit, home);
 new Hotbar(inv);
 const compass = new Compass(), net = new Net(scene, player);
 new Settings({ player, audio, net });
@@ -71,6 +75,12 @@ renderer.setAnimationLoop((now) => {
 
   player.update(dt, input);
   if (started) {
+    if (vit.hp <= 0) { // الموت: تضيع الحقيبة (المخزن محفوظ) ويعود اللاعب للمنزل بعدّة البداية
+      inv.slots.fill(null); ['axe', 'pickaxe', 'knife'].forEach((i) => inv.add(i)); inv.select(0); vit.reset();
+      player.x = home.x - 3; player.z = home.z; player.y = Math.max(world.heightAt(player.x, player.z), -0.6); player.vy = 0;
+      inter.say('💀 متّ — فقدت حقيبتك وعدت إلى المنزل');
+    }
+    vit.render();
     inter.update(dt, input);
     audio.update(dt, env, player, world);
     if (player.stepSurface) audio.step(player.stepSurface);
