@@ -5,6 +5,7 @@ export class TouchControls {
     this.look = { dx: 0, dy: 0 }; // يتجمع حتى يستهلكه اللاعب
     this.jump = false;
     this.sprint = false;
+    this.act = false; this.cam = false;
 
     const $ = (id) => document.getElementById(id);
     const joyZone = $('joyZone'), base = $('joyBase'), knob = $('joyKnob');
@@ -73,13 +74,16 @@ export class TouchControls {
       e.currentTarget.classList.toggle('on', this.sprint);
     }, { passive: false });
 
+    $('btnAct').addEventListener('touchstart', (e) => { e.preventDefault(); this.act = true; }, { passive: false });
+    $('btnCam').addEventListener('touchstart', (e) => { e.preventDefault(); this.cam = true; }, { passive: false });
+
     // لوحة المفاتيح للاختبار على الكمبيوتر فقط
     const keys = {};
     const upd = () => {
       this.move.x = (keys.KeyD ? 1 : 0) - (keys.KeyA ? 1 : 0);
       this.move.y = (keys.KeyW ? 1 : 0) - (keys.KeyS ? 1 : 0);
     };
-    addEventListener('keydown', (e) => { keys[e.code] = true; if (e.code === 'Space') this.jump = true; if (e.code === 'ShiftLeft') this.sprint = true; upd(); });
+    addEventListener('keydown', (e) => { keys[e.code] = true; if (e.code === 'Space') this.jump = true; if (e.code === 'KeyE') this.act = true; if (e.code === 'KeyV') this.cam = true; if (e.code === 'ShiftLeft') this.sprint = true; upd(); });
     addEventListener('keyup', (e) => { keys[e.code] = false; if (e.code === 'ShiftLeft') this.sprint = false; upd(); });
   }
 
@@ -89,4 +93,6 @@ export class TouchControls {
     return d;
   }
   consumeJump() { const j = this.jump; this.jump = false; return j; }
+  consumeAct() { const a = this.act; this.act = false; return a; }
+  consumeCam() { const c = this.cam; this.cam = false; return c; }
 }
