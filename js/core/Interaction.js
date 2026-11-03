@@ -6,8 +6,8 @@ const KINDS = {
 };
 
 export class Interaction {
-  constructor(world, player, inv, audio) {
-    Object.assign(this, { world, player, inv, audio, cd: 0 });
+  constructor(world, player, inv, audio, vit, home) {
+    Object.assign(this, { world, player, inv, audio, vit, home, cd: 0 });
     this.btn = document.getElementById('btnAct');
     this.lbl = document.getElementById('actLbl');
     this.toast = document.getElementById('toast');
@@ -18,7 +18,7 @@ export class Interaction {
   }
   update(dt, input) {
     this.cd -= dt;
-    const p = this.player, fx = -Math.sin(p.yaw), fz = -Math.cos(p.yaw);
+    const p = this.player, V = this.vit, fx = -Math.sin(p.yaw), fz = -Math.cos(p.yaw);
     let best = null, bd = 9;
     for (const c of this.world.nearColliders(p.x, p.z)) {
       if (c.left <= 0) continue;
@@ -26,18 +26,19 @@ export class Interaction {
       if (d > 1.6 || (dx * fx + dz * fz) / len < 0.35) continue; // قريب وأمامك
       if (d < bd) { bd = d; best = c; }
     }
-    const k = best && KINDS[best.type];
-    const cur = this.inv.current;
-    this.btn.classList.toggle('ready', !!k && cur?.id === k.tool);
-    this.lbl.textContent = cur ? ITEMS[cur.id].i : '✋';
+    const k = best && KINDS[best.type], cur = this.inv.current, atHome = !k && this.home.near(p);
+    this.btn.classList.toggle('ready', !!(k && cur?.id === k.tool && !V.tired) || atHome || cur?.id === 'apple');
+    this.lbl.textContent = atHome ? '📦' : cur ? ITEMS[cur.id].i : '✋';
     const act = input.consumeAct();
-    if (act && this.cd <= 0) {
-      this.cd = 0.45;
-      if (!k) return this.audio.hit('miss');
-      if (cur?.id !== k.tool) { this.audio.hit('hand'); return this.say(`تحتاج ${k.need}`); }
-      this.audio.hit(k.sfx);
-      const got = k.gain - this.inv.add(k.id, k.gain);
-      if (got > 0) { best.left--; this.say(`+${got} ${ITEMS[k.id].n}`); } else this.say('الحقيبة ممتلئة');
-    }
+    if (!act || this.cd > 0) return;
+    this.cd = 0.45;
+    if (atHome) return this.say(this.home.use(this.inv, ITEMS));
+    if (!k && cur?.id === 'apple') { this.inv.use(this.inv.sel); V.heal(10, 35); this.audio.hit('hand'); return this.say('🍎 +طاقة'); }
+    if (!k) return this.audio.hit('miss');
+    if (cur?.id !== k.tool) { this.audio.hit('hand'); return this.say(`تحتاج ${k.need}`); }
+    if (!V.can(6)) return this.say('منهك — استرح أو كل تفاحة');
+    V.spend(6); this.audio.hit(k.sfx);
+    const got = k.gain - this.inv.add(k.id, k.gain);
+    if (got > 0) { best.left--; this.say(`+${got} ${ITEMS[k.id].n}`); } else this.say('الحقيبة ممتلئة');
   }
 }
