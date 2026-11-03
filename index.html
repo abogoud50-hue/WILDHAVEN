@@ -10,28 +10,35 @@
 { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
 </script>
 </head>
-<body>
+<body class="menu">
 <canvas id="c"></canvas>
 
 <div id="joyZone"><div id="joyBase"><div id="joyKnob"></div></div></div>
 <div id="lookZone"></div>
-<button id="btnJump" class="btn">قفز</button>
-<button id="btnSprint" class="btn">ركض</button>
 
-<div id="hud">
-  <select id="quality">
-    <option value="low">رسوميات: منخفضة</option>
-    <option value="medium">رسوميات: متوسطة</option>
-    <option value="high">رسوميات: عالية</option>
-  </select>
-  <span id="fps"></span>
-</div>
+<div id="hud"><span id="info"></span><span id="fps"></span></div>
+<div id="mapWrap"><canvas id="mini" width="128" height="128"></canvas><div id="miniLabel"></div></div>
+
+<button id="btnCam" class="btn sm">👁</button>
+<button id="btnSprint" class="btn">ركض</button>
+<button id="btnJump" class="btn">قفز</button>
+<button id="btnAct" class="btn act"><span id="actLbl">تفاعل</span></button>
+
+<div id="toast"></div>
+<div id="itemName"></div>
+<div id="hotbar"></div>
 
 <div id="loading">
-  <h1>WILDHAVEN</h1>
-  <p id="loadMsg">جارٍ تجهيز الجزيرة...</p>
-  <button id="startBtn" hidden>ابدأ اللعب</button>
+  <div id="menu">
+    <div class="brand"><h1>WILDHAVEN</h1><p>بقاء · استكشاف · بناء</p></div>
+    <div class="card">
+      <div class="qrow"><button class="q" data-q="medium">جودة متوسطة</button><button class="q" data-q="high">جودة عالية</button></div>
+      <small>العالية: ظلال ودقة أعلى مع خفض تلقائي للدقة عند الثقل</small>
+      <button id="startBtn">ابدأ اللعب</button>
+    </div>
+  </div>
 </div>
+<div id="rotate">🔄 أدر الهاتف إلى الوضع الأفقي</div>
 
 <script type="module" src="js/main.js"></script>
 </body>
