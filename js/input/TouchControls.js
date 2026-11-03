@@ -75,7 +75,6 @@ export class TouchControls {
     }, { passive: false });
 
     $('btnAct').addEventListener('touchstart', (e) => { e.preventDefault(); this.act = true; }, { passive: false });
-    $('btnCam').addEventListener('touchstart', (e) => { e.preventDefault(); this.cam = true; }, { passive: false });
 
     // لوحة المفاتيح للاختبار على الكمبيوتر فقط
     const keys = {};
