@@ -49,7 +49,9 @@ export class World {
     }
     geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
     geo.computeVertexNormals();
-    scene.add(new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true })));
+    const mesh = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true }));
+    mesh.receiveShadow = true;
+    scene.add(mesh);
   }
 
   _buildWater(scene) {
@@ -61,10 +63,10 @@ export class World {
     scene.add(m);
   }
 
-  _addCollider(x, z, r) {
+  _addCollider(x, z, r, type) {
     const k = Math.floor(x / this.cell) + ',' + Math.floor(z / this.cell);
     if (!this.grid.has(k)) this.grid.set(k, []);
-    this.grid.get(k).push({ x, z, r });
+    this.grid.get(k).push({ x, z, r, type, left: 3 });
   }
 
   nearColliders(x, z) {
@@ -90,7 +92,7 @@ export class World {
       const s = 0.8 + r() * 0.7;
       m.compose(new THREE.Vector3(x, h + 1.2 * s, z), q, new THREE.Vector3(s, s, s)); trunks.setMatrixAt(t, m);
       m.compose(new THREE.Vector3(x, h + 4.2 * s, z), q, new THREE.Vector3(s, s, s)); leaves.setMatrixAt(t, m);
-      this._addCollider(x, z, 0.45 * s);
+      this._addCollider(x, z, 0.45 * s, 'tree');
       t++;
     }
     trunks.count = leaves.count = t;
@@ -101,10 +103,11 @@ export class World {
       if (h < 0.8) continue;
       const s = 0.6 + r() * 1.6;
       m.compose(new THREE.Vector3(x, h + s * 0.4, z), q, new THREE.Vector3(s, s * 0.8, s)); rocks.setMatrixAt(k, m);
-      this._addCollider(x, z, s * 0.85);
+      this._addCollider(x, z, s * 0.85, 'rock');
       k++;
     }
     rocks.count = k;
+    for (const o of [trunks, leaves, rocks]) { o.castShadow = true; o.receiveShadow = true; }
     scene.add(trunks, leaves, rocks);
   }
 }
